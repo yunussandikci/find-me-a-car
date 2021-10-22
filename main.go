@@ -1,23 +1,30 @@
 package main
 
 import (
-	"find-me-a-car/providers/mercedes_benz"
-	"find-me-a-car/services"
+	"find-me-a-car/sahibinden"
+	"strings"
+	"time"
 )
 
+var Brand = "Mercedes"
+var Model = "C 180"
+
+var Sellers = []string{
+	"otomol",
+}
+
 func main() {
-	collectorService := services.NewCollectorService()
-	collectorService.AddProvider(&mercedes_benz.Provider{
-		MinPrice: 0,
-		MaxPrice: 500000,
-		Classes: []mercedes_benz.Class{mercedes_benz.CClass, mercedes_benz.EClass},
-		FuelTypes: []mercedes_benz.FuelType{mercedes_benz.Bensin},
-	})
-	collectedCars := collectorService.Collect()
-
-	dataService := services.NewDataService()
-	dataService.Write(collectedCars)
-
-	read := dataService.Read()
-	print(read)
+	dataService := NewDataService()
+	for {
+		client := sahibinden.NewClient(5*time.Second, 0*time.Second)
+		for _, seller := range Sellers {
+			for _, car := range client.GetSellerCars(seller) {
+				if strings.Contains(car.Brand, Brand) && strings.Contains(car.Model, Model) {
+					if !dataService.IfExist(car.Url) {
+						dataService.Append(car.Url)
+					}
+				}
+			}
+		}
+	}
 }
