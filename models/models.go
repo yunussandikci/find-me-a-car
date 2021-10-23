@@ -1,8 +1,9 @@
 package models
 
 import (
+	"find-me-a-car/common"
 	"fmt"
-	"strings"
+	"regexp"
 )
 
 type Car struct {
@@ -16,20 +17,19 @@ type Car struct {
 	Price   int
 }
 
-func (c *Car) IsBrand(brand string) bool {
-	return strings.Contains(c.Brand, brand)
-}
-
-func (c *Car) IsModel(model string) bool {
-	return strings.Contains(c.Model, model)
-}
-
-func (c *Car) ExceedMaximumMileage(maximumMileage int) bool {
-	return c.Mileage <= maximumMileage
-}
-
-func (c *Car) LowerThanMinimumYear(minimumYear int) bool {
-	return c.Year >= minimumYear
+func (c *Car) IsMatches(brand, model string, minimumYear, maximumMileage, maximumPrice int) bool {
+	brandMatched, regexErr := regexp.MatchString(brand, c.Brand)
+	if regexErr != nil {
+		common.Logger.Errorf(regexErr.Error())
+	}
+	modelMatched, regexErr := regexp.MatchString(model, c.Model)
+	if regexErr != nil {
+		common.Logger.Errorf(regexErr.Error())
+	}
+	mileageMatch := c.Mileage <= maximumMileage
+	priceMatch := c.Price <= maximumPrice
+	yearMatch := c.Year >= minimumYear
+	return brandMatched && modelMatched && mileageMatch && priceMatch && yearMatch
 }
 
 func (c *Car) GetMarkdown() string {

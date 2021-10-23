@@ -84,6 +84,18 @@ func GetMaximumMileage() int {
 	return intVar
 }
 
+func GetMaximumPrice() int {
+	maximumPrice, found := os.LookupEnv("MAXIMUM_PRICE")
+	if !found {
+		return (1<<bits.UintSize)/2 - 1
+	}
+	intVar, err := strconv.Atoi(maximumPrice)
+	if err != nil {
+		panic(err)
+	}
+	return intVar
+}
+
 func GetSellerDomains() []string {
 	sellerDomains, found := os.LookupEnv("SELLER_DOMAINS")
 	if !found {

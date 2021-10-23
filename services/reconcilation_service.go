@@ -7,14 +7,15 @@ import (
 )
 
 type ReconciliationService struct {
-	telegramService   *TelegramService
-	dataService       *DataService
-	sahibindenClient  *sahibinden.Client
-	SellerDomains     []string
-	Brand             string
-	Model             string
-	FilterMinimumYear int
-	MaximumMileage    int
+	telegramService  *TelegramService
+	dataService      *DataService
+	sahibindenClient *sahibinden.Client
+	SellerDomains    []string
+	Brand            string
+	Model            string
+	MinimumYear      int
+	MaximumMileage   int
+	MaximumPrice     int
 }
 
 func NewReconciliationService(telegramService *TelegramService, dataService *DataService,
@@ -45,8 +46,7 @@ func (s *ReconciliationService) reconcileCars(cars []models.Car) {
 }
 
 func (s *ReconciliationService) reconcileCar(car models.Car) {
-	if car.IsBrand(s.Brand) && car.IsModel(s.Model) &&
-		car.ExceedMaximumMileage(s.MaximumMileage) && car.LowerThanMinimumYear(s.FilterMinimumYear) {
+	if car.IsMatches(s.Brand, s.Model, s.MinimumYear, s.MaximumMileage, s.MaximumPrice) {
 		if !s.dataService.IfExist(car.Url) {
 			common.Logger.Infof("Found new car: %s", car.Url)
 			s.dataService.Append(car.Url)
