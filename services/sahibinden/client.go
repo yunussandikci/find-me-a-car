@@ -1,44 +1,31 @@
 package sahibinden
 
 import (
+	"find-me-a-car/common"
+	"find-me-a-car/models"
 	"fmt"
 	"github.com/gocolly/colly"
-	"log"
 	"strings"
 	"time"
 )
 
 type Client struct {
+	randomDelay   time.Duration
 	constantDelay time.Duration
-	collector     *colly.Collector
 }
 
-const UserAgent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/94.0.4606.81 Safari/537.36"
-
 func NewClient(randomDelay, constantDelay time.Duration) *Client {
-	collector := colly.NewCollector(colly.UserAgent(UserAgent))
-	limitErr := collector.Limit(&colly.LimitRule{
-		DomainGlob:  "*sahibinden.com*",
-		RandomDelay: randomDelay,
-	})
-	if limitErr != nil {
-		panic(limitErr)
-	}
 	return &Client{
-		collector:     collector,
+		randomDelay: randomDelay,
 		constantDelay: constantDelay,
 	}
 }
 
-func (c *Client) GetSellerCars(seller string) []Car {
-	time.Sleep(c.constantDelay)
-	collector := c.collector.Clone()
-	collector.OnRequest(func(r *colly.Request) {
-		log.Println("Visiting: ", r.URL.String())
-	})
-	var cars []Car
+func (c *Client) GetSellerCars(seller string) []models.Car {
+	collector := c.newCollector()
+	var cars []models.Car
 	collector.OnHTML(".store-page .classified-list tbody tr", func(e *colly.HTMLElement) {
-		var car Car
+		var car models.Car
 		e.ForEach("td", func(i int, e *colly.HTMLElement) {
 			switch i {
 			case 0:
@@ -73,9 +60,24 @@ func (c *Client) GetSellerCars(seller string) []Car {
 			_ = e.Request.Visit(link)
 		}
 	})
-	visitErr := collector.Visit(GetSellerPageUrl(seller, 50))
+	visitErr := collector.Visit(fmt.Sprintf(SellerUrl, seller, Domain))
 	if visitErr != nil {
-		fmt.Println(visitErr)
+		common.Logger.Errorln(visitErr)
 	}
 	return cars
+}
+
+func (c *Client) newCollector() *colly.Collector {
+	collector := colly.NewCollector()
+	collector.OnRequest(func(r *colly.Request) {
+		time.Sleep(c.constantDelay)
+		common.Logger.Infof("Visiting: %s", r.URL.String())
+		r.Headers.Set("cookie", Cookies)
+		r.Headers.Set("user-agent", UserAgent)
+	})
+	_ = collector.Limit(&colly.LimitRule{
+		DomainGlob:  fmt.Sprintf("*%s*", Domain),
+		RandomDelay: c.randomDelay,
+	})
+	return collector
 }
