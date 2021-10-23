@@ -2,6 +2,7 @@ package services
 
 import (
 	"errors"
+	"find-me-a-car/common"
 	"fmt"
 	"io/ioutil"
 	"os"
@@ -45,14 +46,20 @@ func (d *DataService) IfExist(text string) bool {
 
 func init() {
 	if _, err := os.Stat(dataDirectory); errors.Is(err, os.ErrNotExist) {
+		common.Logger.Infof("Creating %s directory.", dataDirectory)
 		err := os.Mkdir(dataDirectory, os.ModePerm)
 		if err != nil {
 			panic(err)
 		}
 	}
-	file, err := os.OpenFile(dataFile, os.O_CREATE, 0644)
-	if err != nil {
-		panic(err)
+	if _, err := os.Stat(dataFile); errors.Is(err, os.ErrNotExist) {
+		common.Logger.Infof("Creating %s file.", dataFile)
+		file, err := os.OpenFile(dataFile, os.O_CREATE, 0644)
+		if err != nil {
+			panic(err)
+		}
+		file.Close()
+	} else {
+		common.Logger.Infof("Restored %s file.", dataFile)
 	}
-	file.Close()
 }
