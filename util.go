@@ -2,7 +2,6 @@ package main
 
 import (
 	"math/bits"
-	"math/rand"
 	"os"
 	"strconv"
 	"strings"
@@ -38,7 +37,7 @@ func GetDelayRandom() time.Duration {
 	if err != nil {
 		panic(err)
 	}
-	return time.Duration(rand.Int31n(int32(intVar))) * time.Second
+	return time.Duration(intVar) * time.Second
 }
 
 func GetDelayConstant() time.Duration {
@@ -50,7 +49,7 @@ func GetDelayConstant() time.Duration {
 	if err != nil {
 		panic(err)
 	}
-	return time.Duration(rand.Int31n(int32(intVar))) * time.Second
+	return time.Duration(intVar) * time.Second
 }
 
 func GetBrand() string {
@@ -76,7 +75,7 @@ func GetMinimumYear() int {
 func GetMaximumMileage() int {
 	minimumMileage, found := os.LookupEnv("MAXIMUM_MILEAGE")
 	if !found {
-		return (1 << bits.UintSize) / 2 - 1
+		return (1<<bits.UintSize)/2 - 1
 	}
 	intVar, err := strconv.Atoi(minimumMileage)
 	if err != nil {
@@ -90,6 +89,5 @@ func GetSellerDomains() []string {
 	if !found {
 		panic("Seller domains not found.")
 	}
-	return strings.Split(strings.ReplaceAll(sellerDomains," ",""),",")
+	return strings.Split(strings.ReplaceAll(sellerDomains, " ", ""), ",")
 }
-

@@ -7,12 +7,12 @@ import (
 )
 
 type ReconciliationService struct {
-	telegramService      *TelegramService
-	dataService          *DataService
-	sahibindenClient *sahibinden.Client
-	SellerDomains []string
-	Brand         string
-	Model         string
+	telegramService   *TelegramService
+	dataService       *DataService
+	sahibindenClient  *sahibinden.Client
+	SellerDomains     []string
+	Brand             string
+	Model             string
 	FilterMinimumYear int
 	MaximumMileage    int
 }

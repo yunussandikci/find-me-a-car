@@ -11,6 +11,7 @@ const DefaultLogLevel = logrus.InfoLevel
 func init() {
 	Logger.SetLevel(getLogLevel())
 	Logger.SetFormatter(&logrus.TextFormatter{
+		ForceColors: true,
 		FullTimestamp: true,
 	})
 }
